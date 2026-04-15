@@ -1,9 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../supabase";
-import type {
-  ListingCondition,
-  ListingSortOption,
-} from "../utils/listings";
+import type { ListingCondition, ListingSortOption } from "../utils/listings";
 import {
   getConditionRank,
   LISTING_CARD_VIEW_SELECT,
@@ -223,8 +220,9 @@ export const useSeller = (userId: string | null) => {
 
 // ============ Reviews ============
 export const fetchReviews = async (listingId: number) => {
-  const { data, error } = await supabase
-    .rpc("get_reviews_with_verification", { p_listing_id: listingId });
+  const { data, error } = await supabase.rpc("get_reviews_with_verification", {
+    p_listing_id: listingId,
+  });
 
   if (error) throw error;
   return data || [];

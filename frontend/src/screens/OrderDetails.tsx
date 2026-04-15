@@ -595,10 +595,19 @@ const OrderDetails: React.FC = () => {
     try {
       await confirmOrderReceipt(order.id);
       setOrder((prev) =>
-        prev ? { ...prev, buyer_confirmed: true, buyer_confirmed_at: new Date().toISOString() } : prev,
+        prev
+          ? {
+              ...prev,
+              buyer_confirmed: true,
+              buyer_confirmed_at: new Date().toISOString(),
+            }
+          : prev,
       );
     } catch (e: any) {
-      alert("Error", e?.message || "Couldn't confirm receipt. Please try again.");
+      alert(
+        "Error",
+        e?.message || "Couldn't confirm receipt. Please try again.",
+      );
     } finally {
       setConfirming(false);
     }
@@ -612,7 +621,12 @@ const OrderDetails: React.FC = () => {
       await flagOrderIssue(order.id, reason);
       setOrder((prev) =>
         prev
-          ? { ...prev, buyer_confirmed: false, buyer_confirmed_at: new Date().toISOString(), buyer_flag_reason: reason }
+          ? {
+              ...prev,
+              buyer_confirmed: false,
+              buyer_confirmed_at: new Date().toISOString(),
+              buyer_flag_reason: reason,
+            }
           : prev,
       );
     } catch (e: any) {
@@ -985,7 +999,12 @@ const OrderDetails: React.FC = () => {
                 {order.buyer_confirmed === true ? (
                   <View style={styles.confirmBadge}>
                     <CheckCircle size={18} color={Colors.primary_green} />
-                    <Text style={[styles.confirmBadgeText, { color: Colors.primary_green }]}>
+                    <Text
+                      style={[
+                        styles.confirmBadgeText,
+                        { color: Colors.primary_green },
+                      ]}
+                    >
                       You confirmed receipt
                     </Text>
                   </View>
@@ -993,7 +1012,12 @@ const OrderDetails: React.FC = () => {
                   <View style={styles.confirmBadge}>
                     <AlertTriangle size={18} color={Colors.warning} />
                     <View style={{ flex: 1 }}>
-                      <Text style={[styles.confirmBadgeText, { color: Colors.warning }]}>
+                      <Text
+                        style={[
+                          styles.confirmBadgeText,
+                          { color: Colors.warning },
+                        ]}
+                      >
                         Issue reported
                       </Text>
                       {order.buyer_flag_reason ? (
@@ -1009,34 +1033,51 @@ const OrderDetails: React.FC = () => {
                       Did you receive your order as expected?
                     </Text>
                     <Text style={styles.confirmSubprompt}>
-                      You have 48 hours from payment to confirm or report an issue.
+                      You have 48 hours from payment to confirm or report an
+                      issue.
                     </Text>
                     <View style={styles.confirmActions}>
                       <TouchableOpacity
-                        style={[styles.confirmButton, confirming && { opacity: 0.7 }]}
+                        style={[
+                          styles.confirmButton,
+                          confirming && { opacity: 0.7 },
+                        ]}
                         onPress={handleConfirmReceipt}
                         disabled={confirming || reporting}
                       >
                         {confirming ? (
-                          <ActivityIndicator color={Colors.white} size="small" />
+                          <ActivityIndicator
+                            color={Colors.white}
+                            size="small"
+                          />
                         ) : (
                           <>
                             <CheckCircle size={16} color={Colors.white} />
-                            <Text style={styles.confirmButtonText}>Confirm Receipt</Text>
+                            <Text style={styles.confirmButtonText}>
+                              Confirm Receipt
+                            </Text>
                           </>
                         )}
                       </TouchableOpacity>
                       <TouchableOpacity
-                        style={[styles.reportButton, reporting && { opacity: 0.7 }]}
+                        style={[
+                          styles.reportButton,
+                          reporting && { opacity: 0.7 },
+                        ]}
                         onPress={() => setShowReportModal(true)}
                         disabled={confirming || reporting}
                       >
                         {reporting ? (
-                          <ActivityIndicator color={Colors.warning} size="small" />
+                          <ActivityIndicator
+                            color={Colors.warning}
+                            size="small"
+                          />
                         ) : (
                           <>
                             <AlertTriangle size={16} color={Colors.warning} />
-                            <Text style={styles.reportButtonText}>Report an Issue</Text>
+                            <Text style={styles.reportButtonText}>
+                              Report an Issue
+                            </Text>
                           </>
                         )}
                       </TouchableOpacity>
@@ -1045,7 +1086,12 @@ const OrderDetails: React.FC = () => {
                 ) : (
                   <View style={styles.confirmBadge}>
                     <Clock size={18} color={Colors.mutedGray} />
-                    <Text style={[styles.confirmBadgeText, { color: Colors.mutedGray }]}>
+                    <Text
+                      style={[
+                        styles.confirmBadgeText,
+                        { color: Colors.mutedGray },
+                      ]}
+                    >
                       Auto-confirmed
                     </Text>
                   </View>
@@ -1099,7 +1145,9 @@ const OrderDetails: React.FC = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalSheet}>
             <Text style={styles.modalTitle}>Report an Issue</Text>
-            <Text style={styles.modalSubtitle}>What went wrong with your order?</Text>
+            <Text style={styles.modalSubtitle}>
+              What went wrong with your order?
+            </Text>
             {FLAG_REASONS.map((reason) => (
               <TouchableOpacity
                 key={reason}

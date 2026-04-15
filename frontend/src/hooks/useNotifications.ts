@@ -79,7 +79,7 @@ export function useNotifications() {
           }
       }
     },
-    [navigation]
+    [navigation],
   );
 
   useEffect(() => {
@@ -99,7 +99,7 @@ export function useNotifications() {
         const { title, body } = notification.request.content;
         console.log("Notification received:", title, body);
         // The notification handler already shows the system notification
-      }
+      },
     );
 
     // Handle notification taps (user interaction)
@@ -108,7 +108,7 @@ export function useNotifications() {
         const data = response.notification.request.content
           .data as NotificationData;
         handleNotificationNavigation(data);
-      }
+      },
     );
 
     // Check for notification that launched the app (cold start)
@@ -136,7 +136,7 @@ export function useNotifications() {
         if (state === "active") {
           registerForPushNotifications();
         }
-      }
+      },
     );
 
     return () => {

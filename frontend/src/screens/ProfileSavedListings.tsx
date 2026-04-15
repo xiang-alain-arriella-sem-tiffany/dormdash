@@ -22,8 +22,12 @@ type SavedListingsNavigationProp = NativeStackNavigationProp<any>;
 
 const ProfileSavedListings: React.FC = () => {
   const navigation = useNavigation<SavedListingsNavigationProp>();
-  const { data: listings = [], isLoading, refetch, isRefetching } =
-    useSavedListings();
+  const {
+    data: listings = [],
+    isLoading,
+    refetch,
+    isRefetching,
+  } = useSavedListings();
 
   return (
     <SafeAreaView style={styles.container}>

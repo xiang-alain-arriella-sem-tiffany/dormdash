@@ -50,7 +50,9 @@ export const fetchSavedListings = async () => {
 
   return (data || [])
     .map((row: any) => {
-      const listing = Array.isArray(row.listings) ? row.listings[0] : row.listings;
+      const listing = Array.isArray(row.listings)
+        ? row.listings[0]
+        : row.listings;
       return listing || null;
     })
     .filter(Boolean);

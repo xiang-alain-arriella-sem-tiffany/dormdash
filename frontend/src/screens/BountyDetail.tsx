@@ -51,7 +51,10 @@ const statusLabel: Record<BountyStatus, string> = {
   cancelled: "Cancelled",
 };
 
-const statusTone: Record<BountyStatus, "info" | "success" | "warning" | "neutral"> = {
+const statusTone: Record<
+  BountyStatus,
+  "info" | "success" | "warning" | "neutral"
+> = {
   open: "info",
   claimed: "warning",
   picked_up: "warning",
@@ -132,27 +135,23 @@ const BountyDetail: React.FC = () => {
   }, [bountyId, fetchBounty]);
 
   const handleConfirm = async () => {
-    alert(
-      "Confirm Receipt",
-      "Did you receive your item as requested?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Yes, Confirm",
-          onPress: async () => {
-            setActionLoading(true);
-            try {
-              await confirmBountyReceipt(bountyId);
-              void fetchBounty();
-            } catch (err: any) {
-              alert("Error", err?.message || "Failed to confirm receipt.");
-            } finally {
-              setActionLoading(false);
-            }
-          },
+    alert("Confirm Receipt", "Did you receive your item as requested?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Yes, Confirm",
+        onPress: async () => {
+          setActionLoading(true);
+          try {
+            await confirmBountyReceipt(bountyId);
+            void fetchBounty();
+          } catch (err: any) {
+            alert("Error", err?.message || "Failed to confirm receipt.");
+          } finally {
+            setActionLoading(false);
+          }
         },
-      ],
-    );
+      },
+    ]);
   };
 
   const handleFlag = async () => {
@@ -214,7 +213,10 @@ const BountyDetail: React.FC = () => {
     return (
       <SafeAreaView style={styles.container} edges={["top"]}>
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
             <ChevronLeft color={Colors.darkTeal} size={28} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Bounty</Text>
@@ -240,7 +242,10 @@ const BountyDetail: React.FC = () => {
       <StatusBar barStyle="dark-content" />
 
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
           <ChevronLeft color={Colors.darkTeal} size={28} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Bounty Details</Text>
@@ -301,7 +306,9 @@ const BountyDetail: React.FC = () => {
             <Clock color={Colors.mutedGray} size={18} />
             <View style={styles.detailTextBlock}>
               <Text style={styles.detailLabel}>Deadline</Text>
-              <Text style={styles.detailValue}>{formatDate(bounty.deadline)}</Text>
+              <Text style={styles.detailValue}>
+                {formatDate(bounty.deadline)}
+              </Text>
             </View>
           </View>
         </SurfaceCard>
@@ -339,12 +346,17 @@ const BountyDetail: React.FC = () => {
 
         {/* Dispute info */}
         {bounty.status === "disputed" && bounty.buyer_flag_reason ? (
-          <SurfaceCard variant="default" style={[styles.card, styles.disputeCard]}>
+          <SurfaceCard
+            variant="default"
+            style={[styles.card, styles.disputeCard]}
+          >
             <View style={styles.detailRow}>
               <AlertTriangle color="#DC2626" size={18} />
               <View style={styles.detailTextBlock}>
                 <Text style={styles.disputeTitle}>Issue Reported</Text>
-                <Text style={styles.disputeReason}>{bounty.buyer_flag_reason}</Text>
+                <Text style={styles.disputeReason}>
+                  {bounty.buyer_flag_reason}
+                </Text>
               </View>
             </View>
           </SurfaceCard>
@@ -354,7 +366,10 @@ const BountyDetail: React.FC = () => {
         {canConfirm && (
           <View style={styles.actionsBlock}>
             <TouchableOpacity
-              style={[styles.confirmButton, actionLoading && styles.buttonDisabled]}
+              style={[
+                styles.confirmButton,
+                actionLoading && styles.buttonDisabled,
+              ]}
               onPress={() => void handleConfirm()}
               disabled={actionLoading}
             >
@@ -368,7 +383,10 @@ const BountyDetail: React.FC = () => {
               )}
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.flagButton, actionLoading && styles.buttonDisabled]}
+              style={[
+                styles.flagButton,
+                actionLoading && styles.buttonDisabled,
+              ]}
               onPress={() => setShowFlagModal(true)}
               disabled={actionLoading}
             >
@@ -381,7 +399,10 @@ const BountyDetail: React.FC = () => {
         {canCancel && (
           <View style={styles.actionsBlock}>
             <TouchableOpacity
-              style={[styles.cancelButton, actionLoading && styles.buttonDisabled]}
+              style={[
+                styles.cancelButton,
+                actionLoading && styles.buttonDisabled,
+              ]}
               onPress={() => void handleCancel()}
               disabled={actionLoading}
             >
@@ -429,7 +450,10 @@ const BountyDetail: React.FC = () => {
               maxLength={500}
             />
             <TouchableOpacity
-              style={[styles.flagSubmitButton, actionLoading && styles.buttonDisabled]}
+              style={[
+                styles.flagSubmitButton,
+                actionLoading && styles.buttonDisabled,
+              ]}
               onPress={() => void handleFlag()}
               disabled={actionLoading}
             >
@@ -465,7 +489,12 @@ const TimelineRow: React.FC<TimelineRowProps> = ({
         style={[tlStyles.dot, done ? tlStyles.dotDone : tlStyles.dotPending]}
       />
       {!isLast && (
-        <View style={[tlStyles.line, done ? tlStyles.lineDone : tlStyles.linePending]} />
+        <View
+          style={[
+            tlStyles.line,
+            done ? tlStyles.lineDone : tlStyles.linePending,
+          ]}
+        />
       )}
     </View>
     <View style={tlStyles.textBlock}>

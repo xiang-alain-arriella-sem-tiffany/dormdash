@@ -56,7 +56,11 @@ const formatDateTime = (iso: string) =>
 
 const openInMaps = (address: string) => {
   const platform: NativeMapPlatform =
-    Platform.OS === "ios" ? "ios" : Platform.OS === "android" ? "android" : "web";
+    Platform.OS === "ios"
+      ? "ios"
+      : Platform.OS === "android"
+        ? "android"
+        : "web";
   const url = buildOpenInMapsUrl({ platform, address });
   if (url) void Linking.openURL(url);
 };
@@ -98,7 +102,10 @@ const BountyFulfill: React.FC = () => {
       );
     } catch (err: any) {
       console.error("Error claiming bounty:", err);
-      alert("Error", err?.message || "Failed to claim bounty. It may have been taken.");
+      alert(
+        "Error",
+        err?.message || "Failed to claim bounty. It may have been taken.",
+      );
       void fetchBounty();
     } finally {
       setActionLoading(false);
@@ -164,7 +171,10 @@ const BountyFulfill: React.FC = () => {
     return (
       <SafeAreaView style={styles.container} edges={["top"]}>
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
             <ChevronLeft color={Colors.darkTeal} size={28} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Bounty</Text>
@@ -184,7 +194,10 @@ const BountyFulfill: React.FC = () => {
       <StatusBar barStyle="dark-content" />
 
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
           <ChevronLeft color={Colors.darkTeal} size={28} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Bounty</Text>
@@ -266,14 +279,19 @@ const BountyFulfill: React.FC = () => {
             <Clock color={Colors.mutedGray} size={20} />
             <Text style={styles.cardTitle}>Deadline</Text>
           </View>
-          <Text style={styles.deadlineText}>{formatDateTime(bounty.deadline)}</Text>
+          <Text style={styles.deadlineText}>
+            {formatDateTime(bounty.deadline)}
+          </Text>
         </SurfaceCard>
 
         {/* Action Buttons */}
         <View style={styles.actionsBlock}>
           {bounty.status === "open" && (
             <TouchableOpacity
-              style={[styles.primaryButton, actionLoading && styles.buttonDisabled]}
+              style={[
+                styles.primaryButton,
+                actionLoading && styles.buttonDisabled,
+              ]}
               onPress={() => void handleClaim()}
               disabled={actionLoading}
             >
@@ -290,7 +308,10 @@ const BountyFulfill: React.FC = () => {
 
           {bounty.status === "claimed" && (
             <TouchableOpacity
-              style={[styles.primaryButton, actionLoading && styles.buttonDisabled]}
+              style={[
+                styles.primaryButton,
+                actionLoading && styles.buttonDisabled,
+              ]}
               onPress={() => void handlePickedUp()}
               disabled={actionLoading}
             >
@@ -307,7 +328,10 @@ const BountyFulfill: React.FC = () => {
 
           {bounty.status === "picked_up" && (
             <TouchableOpacity
-              style={[styles.deliveredButton, actionLoading && styles.buttonDisabled]}
+              style={[
+                styles.deliveredButton,
+                actionLoading && styles.buttonDisabled,
+              ]}
               onPress={() => void handleDelivered()}
               disabled={actionLoading}
             >
@@ -316,7 +340,9 @@ const BountyFulfill: React.FC = () => {
               ) : (
                 <>
                   <CheckCircle color={Colors.white} size={20} />
-                  <Text style={styles.primaryButtonText}>Mark as Delivered</Text>
+                  <Text style={styles.primaryButtonText}>
+                    Mark as Delivered
+                  </Text>
                 </>
               )}
             </TouchableOpacity>

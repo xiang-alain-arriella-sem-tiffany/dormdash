@@ -599,7 +599,10 @@ export default function ProductDetail({
 
   const calculateAverageRating = (): number => {
     if (reviews.length === 0) return 0;
-    const sum = reviews.reduce((acc: number, review: Review) => acc + review.rating, 0);
+    const sum = reviews.reduce(
+      (acc: number, review: Review) => acc + review.rating,
+      0,
+    );
     return sum / reviews.length;
   };
 
@@ -930,7 +933,10 @@ export default function ProductDetail({
             <Text style={styles.sectionTitle}>Seller</Text>
             <SurfaceCard
               variant="glass"
-              style={[styles.sellerCard, isPhoneWeb && styles.sellerCardPhoneWeb]}
+              style={[
+                styles.sellerCard,
+                isPhoneWeb && styles.sellerCardPhoneWeb,
+              ]}
             >
               {seller.avatar_url ? (
                 <Image
@@ -1158,8 +1164,7 @@ export default function ProductDetail({
                   <Text
                     style={[
                       styles.reportReasonText,
-                      reportReason === reason &&
-                        styles.reportReasonTextActive,
+                      reportReason === reason && styles.reportReasonTextActive,
                     ]}
                   >
                     {reason}

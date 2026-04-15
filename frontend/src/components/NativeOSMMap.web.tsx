@@ -108,18 +108,9 @@ const NativeOSMMap: React.FC<NativeOSMMapProps> = ({
     () => normalizeCoordinate(initialRegion) || initialRegion,
     [initialRegion],
   );
-  const normalizedPickup = useMemo(
-    () => normalizeMarker(pickup),
-    [pickup],
-  );
-  const normalizedDropoff = useMemo(
-    () => normalizeMarker(dropoff),
-    [dropoff],
-  );
-  const normalizedDasher = useMemo(
-    () => normalizeMarker(dasher),
-    [dasher],
-  );
+  const normalizedPickup = useMemo(() => normalizeMarker(pickup), [pickup]);
+  const normalizedDropoff = useMemo(() => normalizeMarker(dropoff), [dropoff]);
+  const normalizedDasher = useMemo(() => normalizeMarker(dasher), [dasher]);
   const normalizedRouteCoordinates = useMemo(
     () =>
       (routeCoordinates || [])
@@ -134,10 +125,12 @@ const NativeOSMMap: React.FC<NativeOSMMapProps> = ({
   const cameraPoints = useMemo(() => {
     const points: MapCoordinate[] = [];
     if (normalizedPickup?.coordinate) points.push(normalizedPickup.coordinate);
-    if (normalizedDropoff?.coordinate) points.push(normalizedDropoff.coordinate);
+    if (normalizedDropoff?.coordinate)
+      points.push(normalizedDropoff.coordinate);
     if (normalizedDasher?.coordinate) points.push(normalizedDasher.coordinate);
     for (const point of normalizedRouteCoordinates) points.push(point);
-    if (normalizedBrowserUserLocation) points.push(normalizedBrowserUserLocation);
+    if (normalizedBrowserUserLocation)
+      points.push(normalizedBrowserUserLocation);
     return points;
   }, [
     normalizedPickup,
@@ -159,7 +152,10 @@ const NativeOSMMap: React.FC<NativeOSMMapProps> = ({
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: `mapbox://styles/${styleId}`,
-      center: [normalizedInitialCenter.longitude, normalizedInitialCenter.latitude],
+      center: [
+        normalizedInitialCenter.longitude,
+        normalizedInitialCenter.latitude,
+      ],
       zoom: initialZoom,
       attributionControl: true,
     });
@@ -241,7 +237,8 @@ const NativeOSMMap: React.FC<NativeOSMMapProps> = ({
     if (!map || hasInitialCameraFitRef.current) return;
 
     const runInitialFit = () => {
-      if (hasInitialCameraFitRef.current || isUserInteractingRef.current) return;
+      if (hasInitialCameraFitRef.current || isUserInteractingRef.current)
+        return;
       if (cameraPoints.length >= 2) {
         const bounds = new mapboxgl.LngLatBounds(
           [cameraPoints[0].longitude, cameraPoints[0].latitude],
@@ -253,7 +250,10 @@ const NativeOSMMap: React.FC<NativeOSMMapProps> = ({
         map.fitBounds(bounds, { padding: 64, maxZoom: 15, duration: 0 });
       } else {
         map.jumpTo({
-          center: [normalizedInitialCenter.longitude, normalizedInitialCenter.latitude],
+          center: [
+            normalizedInitialCenter.longitude,
+            normalizedInitialCenter.latitude,
+          ],
           zoom: initialZoom,
         });
       }
@@ -278,7 +278,10 @@ const NativeOSMMap: React.FC<NativeOSMMapProps> = ({
     markerRefs.current.forEach((marker) => marker.remove());
     markerRefs.current = [];
 
-    const points: Array<{ marker: NormalizedMarkerInfo | null; defaultColor: string }> = [
+    const points: Array<{
+      marker: NormalizedMarkerInfo | null;
+      defaultColor: string;
+    }> = [
       { marker: normalizedPickup, defaultColor: "#F59E0B" },
       { marker: normalizedDropoff, defaultColor: "#22C55E" },
       { marker: normalizedDasher, defaultColor: "#2563EB" },
@@ -327,7 +330,9 @@ const NativeOSMMap: React.FC<NativeOSMMapProps> = ({
       },
       (error) => {
         if (error.code === 1) {
-          setGeolocationError("Location permission was denied in your browser.");
+          setGeolocationError(
+            "Location permission was denied in your browser.",
+          );
           return;
         }
         setGeolocationError("Unable to access your browser location.");

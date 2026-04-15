@@ -133,7 +133,7 @@ export async function deactivatePushToken(): Promise<void> {
  * Add listener for notifications received while app is foregrounded
  */
 export function addNotificationReceivedListener(
-  callback: (notification: Notifications.Notification) => void
+  callback: (notification: Notifications.Notification) => void,
 ): Notifications.EventSubscription {
   return Notifications.addNotificationReceivedListener(callback);
 }
@@ -142,7 +142,7 @@ export function addNotificationReceivedListener(
  * Add listener for notification responses (user tapped notification)
  */
 export function addNotificationResponseReceivedListener(
-  callback: (response: Notifications.NotificationResponse) => void
+  callback: (response: Notifications.NotificationResponse) => void,
 ): Notifications.EventSubscription {
   return Notifications.addNotificationResponseReceivedListener(callback);
 }

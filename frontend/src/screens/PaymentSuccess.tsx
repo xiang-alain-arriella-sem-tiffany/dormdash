@@ -142,7 +142,9 @@ const PaymentSuccess: React.FC<Props> = ({ navigation, route }) => {
         }
 
         if (!orderId || Number.isNaN(orderId)) {
-          console.warn("No orderId or bountyId found in URL, route params, or storage");
+          console.warn(
+            "No orderId or bountyId found in URL, route params, or storage",
+          );
           setProcessingWarning(
             "We could not confirm which order to finalize. Please check your order history.",
           );
@@ -169,10 +171,8 @@ const PaymentSuccess: React.FC<Props> = ({ navigation, route }) => {
         }
 
         // 4. Finalize payment/inventory exactly once in the database.
-        const { data: finalizeResult, error: finalizeError } = await supabase.rpc(
-          "finalize_paid_order",
-          { p_order_id: orderId },
-        );
+        const { data: finalizeResult, error: finalizeError } =
+          await supabase.rpc("finalize_paid_order", { p_order_id: orderId });
 
         if (finalizeError) {
           console.error("Error finalizing paid order:", finalizeError);
@@ -208,7 +208,8 @@ const PaymentSuccess: React.FC<Props> = ({ navigation, route }) => {
           id: Number(finalizedOrder.order_id ?? orderId),
           status: String(finalizedOrder.status ?? orderBeforeFinalize.status),
           delivery_method: String(
-            finalizedOrder.delivery_method ?? orderBeforeFinalize.delivery_method,
+            finalizedOrder.delivery_method ??
+              orderBeforeFinalize.delivery_method,
           ),
         };
 

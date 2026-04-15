@@ -214,7 +214,9 @@ export const useConfirmBountyReceipt = () => {
       queryClient.invalidateQueries({
         queryKey: bountyQueryKeys.detail(bountyId),
       });
-      queryClient.invalidateQueries({ queryKey: bountyQueryKeys.buyerBounties });
+      queryClient.invalidateQueries({
+        queryKey: bountyQueryKeys.buyerBounties,
+      });
     },
   });
 };
@@ -229,7 +231,9 @@ export const useFlagBountyIssue = () => {
       queryClient.invalidateQueries({
         queryKey: bountyQueryKeys.detail(variables.bountyId),
       });
-      queryClient.invalidateQueries({ queryKey: bountyQueryKeys.buyerBounties });
+      queryClient.invalidateQueries({
+        queryKey: bountyQueryKeys.buyerBounties,
+      });
     },
   });
 };
@@ -243,7 +247,9 @@ export const useCancelBounty = () => {
       queryClient.invalidateQueries({
         queryKey: bountyQueryKeys.detail(bountyId),
       });
-      queryClient.invalidateQueries({ queryKey: bountyQueryKeys.buyerBounties });
+      queryClient.invalidateQueries({
+        queryKey: bountyQueryKeys.buyerBounties,
+      });
     },
   });
 };

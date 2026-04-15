@@ -351,8 +351,8 @@ export default function AuthWelcome() {
 
           <SurfaceCard
             variant="default"
-              style={[styles.sectionCard, isWeb && styles.firstSectionGapWeb]}
-            >
+            style={[styles.sectionCard, isWeb && styles.firstSectionGapWeb]}
+          >
             <SectionHeader
               title="Selling points"
               subtitle="Everything needed to transact confidently on campus."

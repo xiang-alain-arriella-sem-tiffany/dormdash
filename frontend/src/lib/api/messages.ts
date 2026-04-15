@@ -112,8 +112,9 @@ export const fetchInbox = async (
   const userId = await getCurrentUserId();
   if (!userId) return [];
 
-  const { data, error } = await supabase
-    .rpc("get_inbox_threads", { p_limit: limit });
+  const { data, error } = await supabase.rpc("get_inbox_threads", {
+    p_limit: limit,
+  });
 
   if (error) throw error;
   return (data || []).map((row: any) => ({
@@ -151,10 +152,12 @@ export const fetchConversationHeader = async (
   const userId = await getCurrentUserId();
   if (!userId) throw new Error("Not authenticated");
 
-  const { data, error } = await supabase
-    .rpc("get_conversation_header_details", {
+  const { data, error } = await supabase.rpc(
+    "get_conversation_header_details",
+    {
       p_conversation_id: conversationId,
-    });
+    },
+  );
 
   if (error) throw error;
   const row = Array.isArray(data) ? data[0] : data;

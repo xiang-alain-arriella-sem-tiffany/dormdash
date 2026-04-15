@@ -10,7 +10,12 @@ import {
   StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { TrendingUp, ChevronLeft, Package, AlertTriangle } from "lucide-react-native";
+import {
+  TrendingUp,
+  ChevronLeft,
+  Package,
+  AlertTriangle,
+} from "lucide-react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Colors, Typography, Spacing, BorderRadius } from "../assets/styles";
@@ -43,11 +48,20 @@ const SaleCard: React.FC<{ item: SellerSale }> = ({ item }) => {
   const isUnseen = !item.seller_seen;
   const isDisputed = item.buyer_confirmed === false;
   return (
-    <View style={[styles.saleCard, isUnseen && styles.saleCardUnseen, isDisputed && styles.saleCardDisputed]}>
+    <View
+      style={[
+        styles.saleCard,
+        isUnseen && styles.saleCardUnseen,
+        isDisputed && styles.saleCardDisputed,
+      ]}
+    >
       {isUnseen && <View style={styles.unseenDot} />}
       {isDisputed && <View style={styles.disputedDot} />}
       <View style={styles.saleIconContainer}>
-        <TrendingUp color={isDisputed ? Colors.warning : Colors.primary_green} size={28} />
+        <TrendingUp
+          color={isDisputed ? Colors.warning : Colors.primary_green}
+          size={28}
+        />
       </View>
       <View style={styles.saleInfo}>
         <Text style={styles.saleTitle} numberOfLines={2}>

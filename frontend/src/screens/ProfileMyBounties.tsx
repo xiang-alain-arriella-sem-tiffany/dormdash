@@ -24,7 +24,10 @@ type MyBountiesNavigation = NativeStackNavigationProp<{
   PlaceBounty: undefined;
 }>;
 
-const statusTone: Record<BountyStatus, "info" | "success" | "warning" | "neutral"> = {
+const statusTone: Record<
+  BountyStatus,
+  "info" | "success" | "warning" | "neutral"
+> = {
   open: "info",
   claimed: "warning",
   picked_up: "warning",
@@ -51,7 +54,9 @@ const ProfileMyBounties: React.FC = () => {
 
   useFocusEffect(
     useCallback(() => {
-      void queryClient.invalidateQueries({ queryKey: bountyQueryKeys.buyerBounties });
+      void queryClient.invalidateQueries({
+        queryKey: bountyQueryKeys.buyerBounties,
+      });
     }, [queryClient]),
   );
 
@@ -114,11 +119,17 @@ const ProfileMyBounties: React.FC = () => {
   );
 
   const sections = [
-    ...(activeBounties.length > 0 ? [{ title: "Active", data: activeBounties }] : []),
-    ...(pastBounties.length > 0 ? [{ title: "Completed / Cancelled", data: pastBounties }] : []),
+    ...(activeBounties.length > 0
+      ? [{ title: "Active", data: activeBounties }]
+      : []),
+    ...(pastBounties.length > 0
+      ? [{ title: "Completed / Cancelled", data: pastBounties }]
+      : []),
   ];
 
-  const flatData: Array<{ type: "header"; title: string } | { type: "item"; bounty: Bounty }> = [];
+  const flatData: Array<
+    { type: "header"; title: string } | { type: "item"; bounty: Bounty }
+  > = [];
   for (const section of sections) {
     flatData.push({ type: "header", title: section.title });
     for (const bounty of section.data) {
@@ -173,7 +184,9 @@ const ProfileMyBounties: React.FC = () => {
         <FlatList
           data={flatData}
           keyExtractor={(item, index) =>
-            item.type === "header" ? `header-${item.title}` : `bounty-${(item as any).bounty.id}`
+            item.type === "header"
+              ? `header-${item.title}`
+              : `bounty-${(item as any).bounty.id}`
           }
           renderItem={({ item }) => {
             if (item.type === "header") {

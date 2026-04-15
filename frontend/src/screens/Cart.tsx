@@ -189,7 +189,10 @@ const Cart: React.FC = () => {
 
     if (newQty === item.quantity) {
       if (change > 0) {
-        alert("Stock limit", `Only ${formatStockLabel(item.available_quantity)}.`);
+        alert(
+          "Stock limit",
+          `Only ${formatStockLabel(item.available_quantity)}.`,
+        );
       }
       return;
     }
@@ -484,76 +487,79 @@ const Cart: React.FC = () => {
               variant="default"
               style={styles.cartItemCard}
             >
-            {/* Checkbox */}
-            <TouchableOpacity
-              style={styles.checkbox}
-              onPress={() => toggleItemSelection(item.id)}
-              disabled={!itemAvailable}
-            >
-              {selectedItems.includes(item.id) ? (
-                <CheckSquare color={Colors.primary_blue} size={20} />
-              ) : (
-                <Square color={Colors.mutedGray} size={20} />
-              )}
-            </TouchableOpacity>
-
-            {/* Image */}
-            <View style={styles.itemImage}>
-              {item.image_url ? (
-                <Image source={{ uri: item.image_url }} style={styles.image} />
-              ) : (
-                <ImageIcon size={40} color={Colors.mutedGray} />
-              )}
-            </View>
-
-            {/* Details */}
-            <View style={styles.itemDetails}>
-              <Text style={styles.itemTitle} numberOfLines={2}>
-                {item.title}
-              </Text>
-              <Text style={styles.itemPrice}>
-                {formatPrice(item.price_cents)}
-              </Text>
-              <Text
-                style={[
-                  styles.itemMetaText,
-                  !itemAvailable && styles.itemUnavailableText,
-                ]}
+              {/* Checkbox */}
+              <TouchableOpacity
+                style={styles.checkbox}
+                onPress={() => toggleItemSelection(item.id)}
+                disabled={!itemAvailable}
               >
-                {itemAvailable
-                  ? formatStockLabel(item.available_quantity)
-                  : "Unavailable"}
-              </Text>
+                {selectedItems.includes(item.id) ? (
+                  <CheckSquare color={Colors.primary_blue} size={20} />
+                ) : (
+                  <Square color={Colors.mutedGray} size={20} />
+                )}
+              </TouchableOpacity>
 
-              {/* Quantity */}
-              <View style={styles.quantityContainer}>
-                <TouchableOpacity
-                  style={styles.quantityButton}
-                  onPress={() => updateQuantity(item.id, -1)}
-                  disabled={!itemAvailable}
-                >
-                  <Minus color={Colors.darkTeal} size={18} />
-                </TouchableOpacity>
-
-                <Text style={styles.quantityText}>{item.quantity}</Text>
-
-                <TouchableOpacity
-                  style={styles.quantityButton}
-                  onPress={() => updateQuantity(item.id, 1)}
-                  disabled={!itemAvailable}
-                >
-                  <Plus color={Colors.darkTeal} size={18} />
-                </TouchableOpacity>
+              {/* Image */}
+              <View style={styles.itemImage}>
+                {item.image_url ? (
+                  <Image
+                    source={{ uri: item.image_url }}
+                    style={styles.image}
+                  />
+                ) : (
+                  <ImageIcon size={40} color={Colors.mutedGray} />
+                )}
               </View>
-            </View>
 
-            {/* Remove */}
-            <TouchableOpacity
-              style={styles.removeButton}
-              onPress={() => removeItem(item.id)}
-            >
-              <Trash2 color={Colors.error} size={24} />
-            </TouchableOpacity>
+              {/* Details */}
+              <View style={styles.itemDetails}>
+                <Text style={styles.itemTitle} numberOfLines={2}>
+                  {item.title}
+                </Text>
+                <Text style={styles.itemPrice}>
+                  {formatPrice(item.price_cents)}
+                </Text>
+                <Text
+                  style={[
+                    styles.itemMetaText,
+                    !itemAvailable && styles.itemUnavailableText,
+                  ]}
+                >
+                  {itemAvailable
+                    ? formatStockLabel(item.available_quantity)
+                    : "Unavailable"}
+                </Text>
+
+                {/* Quantity */}
+                <View style={styles.quantityContainer}>
+                  <TouchableOpacity
+                    style={styles.quantityButton}
+                    onPress={() => updateQuantity(item.id, -1)}
+                    disabled={!itemAvailable}
+                  >
+                    <Minus color={Colors.darkTeal} size={18} />
+                  </TouchableOpacity>
+
+                  <Text style={styles.quantityText}>{item.quantity}</Text>
+
+                  <TouchableOpacity
+                    style={styles.quantityButton}
+                    onPress={() => updateQuantity(item.id, 1)}
+                    disabled={!itemAvailable}
+                  >
+                    <Plus color={Colors.darkTeal} size={18} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Remove */}
+              <TouchableOpacity
+                style={styles.removeButton}
+                onPress={() => removeItem(item.id)}
+              >
+                <Trash2 color={Colors.error} size={24} />
+              </TouchableOpacity>
             </SurfaceCard>
           );
         })}

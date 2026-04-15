@@ -117,8 +117,7 @@ export const mapListingCardRow = <T extends ListingCardRow>(row: T) => {
     available_quantity: Number(row.available_quantity ?? 0),
     condition: row.condition ?? null,
     status: row.status ?? null,
-    category_id:
-      row.category_id == null ? null : Number(row.category_id),
+    category_id: row.category_id == null ? null : Number(row.category_id),
     listing_tags: Array.isArray(row.listing_tags)
       ? row.listing_tags.map((tagId) => Number(tagId))
       : [],
