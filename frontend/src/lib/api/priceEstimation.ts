@@ -87,8 +87,9 @@ export const estimateItemPrice = async (
         ? parsed.reasoning
         : "AI-based estimate.";
     const mismatchWarning =
-      typeof parsed.mismatchWarning === "string"
-        ? parsed.mismatchWarning
+      typeof parsed.mismatchWarning === "string" &&
+      parsed.mismatchWarning.trim().toLowerCase() !== "null"
+        ? parsed.mismatchWarning.trim()
         : undefined;
 
     const { recommendedMargin, recommendedBountyAmount } =

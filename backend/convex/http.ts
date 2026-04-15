@@ -33,8 +33,38 @@ CRITICAL PRICING RULES:
   * CVS snacks/drinks: use standard retail pricing
 - For local/independent stores near UPenn, estimate based on typical University City pricing
 - unitPriceCents must be the price of a SINGLE item, not the total
-- Do NOT lowball prices — accuracy matters more than conservatism`;
+- Do NOT lowball prices — accuracy matters more than conservatism
+- If there is no mismatch warning, return JSON null for mismatchWarning, not the string "null"`;
 }
+
+const priceEstimateResponseFormat = {
+  type: "json_schema",
+  json_schema: {
+    name: "price_estimate",
+    strict: true,
+    schema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        unitPriceCents: { type: "number" },
+        confidence: {
+          type: "string",
+          enum: ["high", "medium", "low"],
+        },
+        reasoning: { type: "string" },
+        mismatchWarning: {
+          anyOf: [{ type: "string" }, { type: "null" }],
+        },
+      },
+      required: [
+        "unitPriceCents",
+        "confidence",
+        "reasoning",
+        "mismatchWarning",
+      ],
+    },
+  },
+} as const;
 
 http.route({
   path: "/create-checkout-session",
@@ -127,21 +157,30 @@ http.route({
             Authorization: `Bearer ${openaiApiKey}`,
           },
           body: JSON.stringify({
-            model: "gpt-4o-mini",
+            model: "gpt-5.4-nano",
             messages: [{ role: "user", content: prompt }],
             temperature: 0.2,
-            max_tokens: 300,
+            max_completion_tokens: 300,
+            response_format: priceEstimateResponseFormat,
           }),
         },
       );
 
       if (!response.ok) {
-        throw new Error(`OpenAI HTTP ${response.status}`);
+        const errorBody = await response.text();
+        throw new Error(`OpenAI HTTP ${response.status}: ${errorBody}`);
       }
 
       const data = await response.json();
       const raw = data.choices?.[0]?.message?.content?.trim() ?? "";
+      if (!raw) {
+        throw new Error("OpenAI returned an empty price estimate");
+      }
+
       const parsed = JSON.parse(raw);
+      if (parsed.mismatchWarning === "null") {
+        parsed.mismatchWarning = null;
+      }
 
       return new Response(JSON.stringify(parsed), {
         status: 200,
