@@ -1,14 +1,18 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  FlatList,
-  RefreshControl,
-  StatusBar,
   ActivityIndicator,
+  FlatList,
+  KeyboardAvoidingView,
+  Modal,
   Platform,
+  RefreshControl,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -51,6 +55,12 @@ import {
 } from "../lib/api/bounties";
 import type { Bounty } from "../lib/api/bounties";
 import {
+  isTransferAmountValid,
+  isValidRoutingNumber,
+  normalizeRoutingNumber,
+  parseTransferAmountToCents,
+} from "../lib/transferToBank";
+import {
   LiveBadge,
   SectionHeader,
   StatusPill,
@@ -77,6 +87,13 @@ const DasherDashboard: React.FC = () => {
   const [openBounties, setOpenBounties] = useState<Bounty[]>([]);
   const [myActiveBounties, setMyActiveBounties] = useState<Bounty[]>([]);
   const [togglingStatus, setTogglingStatus] = useState(false);
+  const [transferModalVisible, setTransferModalVisible] = useState(false);
+  const [transferRoutingNumber, setTransferRoutingNumber] = useState("");
+  const [transferAccountNumber, setTransferAccountNumber] = useState("");
+  const [transferAmount, setTransferAmount] = useState("");
+  const [transferSubmitting, setTransferSubmitting] = useState(false);
+  const [transferSuccess, setTransferSuccess] = useState(false);
+  const [transferError, setTransferError] = useState("");
   const [currentLocation, setCurrentLocation] = useState<{
     lat: number;
     lng: number;
@@ -85,6 +102,8 @@ const DasherDashboard: React.FC = () => {
   const realtimeRefreshTimeoutRef = useRef<ReturnType<
     typeof setTimeout
   > | null>(null);
+  const transferTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const transferAmountCentsRef = useRef<number>(0);
   const fetchDasherDataRef = useRef<() => Promise<void>>(async () => {});
 
   const getPickupDetails = useCallback((order: DeliveryOrder) => {
@@ -195,6 +214,15 @@ const DasherDashboard: React.FC = () => {
   useEffect(() => {
     fetchDasherDataRef.current = fetchDasherData;
   }, [fetchDasherData]);
+
+  useEffect(() => {
+    return () => {
+      if (transferTimeoutRef.current) {
+        clearTimeout(transferTimeoutRef.current);
+        transferTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   const queueRealtimeRefresh = useCallback(() => {
     if (realtimeRefreshTimeoutRef.current) {
@@ -515,10 +543,98 @@ const DasherDashboard: React.FC = () => {
       return;
     }
 
-    alert(
-      "Transfers coming soon",
-      `You currently have ${formatPrice(availableToTransferCents)} available to transfer.`,
-    );
+    setTransferError("");
+    setTransferSuccess(false);
+    setTransferRoutingNumber("");
+    setTransferAccountNumber("");
+    setTransferAmount("");
+    setTransferModalVisible(true);
+  };
+
+  const closeTransferModal = () => {
+    if (transferSubmitting) return;
+    if (transferTimeoutRef.current) {
+      clearTimeout(transferTimeoutRef.current);
+      transferTimeoutRef.current = null;
+    }
+    setTransferModalVisible(false);
+    setTransferError("");
+    setTransferSuccess(false);
+    transferAmountCentsRef.current = 0;
+  };
+
+  const handleRoutingNumberChange = (value: string) => {
+    setTransferRoutingNumber(normalizeRoutingNumber(value));
+  };
+
+  const handleAccountNumberChange = (value: string) => {
+    setTransferAccountNumber(value.replace(/\D/g, ""));
+  };
+
+  const handleAmountChange = (value: string) => {
+    setTransferAmount(value.replace(/[^\d.]/g, ""));
+  };
+
+  const submitTransferRequest = () => {
+    if (!dasherInfo) return;
+
+    const availableToTransferCents = getAvailableToTransferCents(dasherInfo);
+    const routingNumber = normalizeRoutingNumber(transferRoutingNumber);
+    const accountNumber = transferAccountNumber.trim();
+    const amountCents = parseTransferAmountToCents(transferAmount);
+
+    if (!isValidRoutingNumber(routingNumber)) {
+      setTransferError("Enter a valid 9-digit US routing number.");
+      return;
+    }
+
+    if (!/^\d{6,17}$/.test(accountNumber)) {
+      setTransferError("Enter a valid account number.");
+      return;
+    }
+
+    if (
+      amountCents == null ||
+      !isTransferAmountValid(amountCents, availableToTransferCents)
+    ) {
+      setTransferError(
+        `Enter an amount between $0.01 and ${formatPrice(availableToTransferCents)}.`,
+      );
+      return;
+    }
+
+    setTransferError("");
+    setTransferSubmitting(true);
+    setTransferSuccess(false);
+    transferAmountCentsRef.current = amountCents;
+
+    if (transferTimeoutRef.current) {
+      clearTimeout(transferTimeoutRef.current);
+    }
+
+    transferTimeoutRef.current = setTimeout(() => {
+      setTransferSubmitting(false);
+      setTransferSuccess(true);
+      setDasherInfo((current) => {
+        if (!current) return current;
+
+        const currentAvailable = getAvailableToTransferCents(current);
+        const nextAvailable = Math.max(
+          currentAvailable - transferAmountCentsRef.current,
+          0,
+        );
+
+        return {
+          ...current,
+          available_to_transfer_cents: nextAvailable,
+          total_cashed_out_cents:
+            (current.total_cashed_out_cents || 0) +
+            transferAmountCentsRef.current,
+        };
+      });
+      transferAmountCentsRef.current = 0;
+      transferTimeoutRef.current = null;
+    }, 2000);
   };
 
   const renderAvailableBounty = ({ item }: { item: Bounty }) => (
@@ -809,6 +925,115 @@ const DasherDashboard: React.FC = () => {
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <StatusBar barStyle="dark-content" />
+
+      <Modal
+        visible={transferModalVisible}
+        animationType="fade"
+        transparent
+        onRequestClose={closeTransferModal}
+      >
+        <View style={styles.transferModalOverlay}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            style={styles.transferModalKeyboardAvoiding}
+          >
+            <View style={styles.transferModalCard}>
+              <View style={styles.transferModalHeader}>
+                <Text style={styles.transferModalTitle}>Transfer to bank</Text>
+                <TouchableOpacity onPress={closeTransferModal}>
+                  <Text style={styles.transferModalCloseText}>Close</Text>
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.transferModalSubtitle}>
+                Available to transfer: {formatPrice(availableToTransferCents)}
+              </Text>
+
+              {transferSuccess ? (
+                <View style={styles.transferSuccessCard}>
+                  <Text style={styles.transferSuccessTitle}>
+                    Transfer submitted
+                  </Text>
+                  <Text style={styles.transferSuccessText}>
+                    It will transfer in 3 business days.
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.transferSuccessButton}
+                    onPress={closeTransferModal}
+                  >
+                    <Text style={styles.transferSuccessButtonText}>Done</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <ScrollView
+                  contentContainerStyle={styles.transferFormContent}
+                  keyboardShouldPersistTaps="handled"
+                >
+                  <Text style={styles.transferFieldLabel}>Routing number</Text>
+                  <TextInput
+                    style={styles.transferInput}
+                    value={transferRoutingNumber}
+                    onChangeText={handleRoutingNumberChange}
+                    placeholder="9-digit routing number"
+                    placeholderTextColor={Colors.mutedGray}
+                    keyboardType="number-pad"
+                    maxLength={9}
+                  />
+
+                  <Text style={styles.transferFieldLabel}>Account number</Text>
+                  <TextInput
+                    style={styles.transferInput}
+                    value={transferAccountNumber}
+                    onChangeText={handleAccountNumberChange}
+                    placeholder="Account number"
+                    placeholderTextColor={Colors.mutedGray}
+                    keyboardType="number-pad"
+                    maxLength={17}
+                  />
+
+                  <Text style={styles.transferFieldLabel}>
+                    Amount to transfer
+                  </Text>
+                  <TextInput
+                    style={styles.transferInput}
+                    value={transferAmount}
+                    onChangeText={handleAmountChange}
+                    placeholder="0.00"
+                    placeholderTextColor={Colors.mutedGray}
+                    keyboardType="decimal-pad"
+                  />
+                  <Text style={styles.transferHelperText}>
+                    Maximum allowed: {formatPrice(availableToTransferCents)}
+                  </Text>
+
+                  {transferError ? (
+                    <Text style={styles.transferErrorText}>
+                      {transferError}
+                    </Text>
+                  ) : null}
+
+                  <TouchableOpacity
+                    style={[
+                      styles.transferSubmitButton,
+                      transferSubmitting && styles.transferSubmitButtonDisabled,
+                    ]}
+                    onPress={submitTransferRequest}
+                    disabled={transferSubmitting}
+                  >
+                    {transferSubmitting ? (
+                      <ActivityIndicator color={Colors.white} />
+                    ) : (
+                      <Text style={styles.transferSubmitButtonText}>
+                        Submit transfer
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                </ScrollView>
+              )}
+            </View>
+          </KeyboardAvoidingView>
+        </View>
+      </Modal>
 
       <FlatList
         data={[]}
@@ -1188,6 +1413,126 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.grayDisabled,
   },
   transferButtonText: {
+    fontSize: 16,
+    fontFamily: Typography.buttonText.fontFamily,
+    fontWeight: "700",
+    color: Colors.white,
+  },
+  transferModalOverlay: {
+    flex: 1,
+    backgroundColor: Colors.overlayDark,
+    justifyContent: "center",
+    padding: Spacing.lg,
+  },
+  transferModalKeyboardAvoiding: {
+    width: "100%",
+    alignItems: "center",
+  },
+  transferModalCard: {
+    width: "100%",
+    maxWidth: 480,
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius.large,
+    padding: Spacing.xl,
+    gap: Spacing.md,
+  },
+  transferModalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  transferModalTitle: {
+    fontSize: 22,
+    fontFamily: Typography.heading4.fontFamily,
+    fontWeight: "700",
+    color: Colors.darkTeal,
+  },
+  transferModalCloseText: {
+    fontSize: 14,
+    fontFamily: Typography.bodySemibold.fontFamily,
+    color: Colors.primary_blue,
+    fontWeight: "700",
+  },
+  transferModalSubtitle: {
+    fontSize: 14,
+    fontFamily: Typography.bodyMedium.fontFamily,
+    color: Colors.mutedGray,
+  },
+  transferFormContent: {
+    gap: Spacing.sm,
+    paddingBottom: Spacing.sm,
+  },
+  transferFieldLabel: {
+    fontSize: 14,
+    fontFamily: Typography.bodySemibold.fontFamily,
+    color: Colors.darkTeal,
+    marginTop: Spacing.sm,
+  },
+  transferInput: {
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    borderRadius: BorderRadius.medium,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+    fontSize: 16,
+    fontFamily: Typography.bodyMedium.fontFamily,
+    color: Colors.darkTeal,
+    backgroundColor: Colors.lightGray,
+  },
+  transferHelperText: {
+    fontSize: 12,
+    fontFamily: Typography.bodySmall.fontFamily,
+    color: Colors.mutedGray,
+    marginTop: -Spacing.xs,
+  },
+  transferErrorText: {
+    fontSize: 13,
+    fontFamily: Typography.bodySemibold.fontFamily,
+    color: Colors.error,
+    marginTop: Spacing.xs,
+  },
+  transferSubmitButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.primary_blue,
+    borderRadius: BorderRadius.medium,
+    paddingVertical: Spacing.md,
+    marginTop: Spacing.sm,
+  },
+  transferSubmitButtonDisabled: {
+    backgroundColor: Colors.grayDisabled,
+  },
+  transferSubmitButtonText: {
+    fontSize: 16,
+    fontFamily: Typography.buttonText.fontFamily,
+    fontWeight: "700",
+    color: Colors.white,
+  },
+  transferSuccessCard: {
+    alignItems: "center",
+    gap: Spacing.md,
+    paddingVertical: Spacing.lg,
+  },
+  transferSuccessTitle: {
+    fontSize: 20,
+    fontFamily: Typography.heading4.fontFamily,
+    fontWeight: "700",
+    color: Colors.darkTeal,
+  },
+  transferSuccessText: {
+    fontSize: 15,
+    fontFamily: Typography.bodyMedium.fontFamily,
+    color: Colors.mutedGray,
+    textAlign: "center",
+  },
+  transferSuccessButton: {
+    backgroundColor: Colors.primary_green,
+    borderRadius: BorderRadius.medium,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.xl,
+  },
+  transferSuccessButtonText: {
     fontSize: 16,
     fontFamily: Typography.buttonText.fontFamily,
     fontWeight: "700",
